@@ -6,13 +6,15 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Mail;
+use App\Mail\Checkout\Paid;
 
-class AfterCheckout extends Mailable
+class Paid extends Mailable
 {
     use Queueable, SerializesModels;
-    
+
     private $checkout;
-    
+
     /**
      * Create a new message instance.
      *
@@ -30,7 +32,7 @@ class AfterCheckout extends Mailable
      */
     public function build()
     {
-        return $this->subject("Register Camp : {$this->checkout->Camp->title}")->markdown('emails.checkout.afterCheckout', [
+        return $this->subject('Your Transaction Has Been Confirmed!')->markdown('emails.checkout.paid', [
             'checkout' => $this->checkout
         ]);
     }
