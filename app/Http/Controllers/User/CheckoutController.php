@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\User\Checkout\Store;
 use App\Mail\Checkout\AfterCheckout;
 use App\Models\Camp;
+use App\Models\Discount;
 use Auth;
 use Mail;
 use Str;
@@ -68,6 +69,12 @@ class CheckoutController extends Controller
         $user->phone = $request['phone'];
         $user->address = $request['address'];
         $user->save();
+
+        if ($request->discount) {
+            $discount = Discount::whereCode($request->discount)->first();
+            $data['discount_id'] = $discount->id;
+            $data['percentage'] = $discount->percentage;
+        } 
 
         $checkout = Checkout::create($data);
         $this->getSnapRedirect($checkout);
@@ -134,16 +141,29 @@ class CheckoutController extends Controller
 
         $checkout->midtrans_booking_code = $orderId;
 
-        $transaction_details = [
-            'order_id' => $orderId,
-            'gross_amount' => $price
-        ];
-
         $item_details[] = [
             'id' => $orderId,
             'price' => $price,
             'quantity' => 1,
             'name' => "Payment for {$checkout->Camp->title} Camp"
+        ];
+        
+        $discountPrice = 0;
+        if ($checkout->Discount) {
+            $discountPrice = $price * $checkout->percentage / 100;
+            $item_details[] = [
+                'id' => $checkout->Discount->code,
+                'price' => -$discountPrice,
+                'quantity' => 1,
+                'name' => "Discount {$checkout->Discount->name} ({$checkout->percentage}%)"
+            ];
+        }
+
+        $total = $price - $discountPrice;
+
+        $transaction_details = [
+            'order_id' => $orderId,
+            'gross_amount' => $price
         ];
 
         $userData = [
@@ -173,6 +193,7 @@ class CheckoutController extends Controller
         try {
             $paymentUrl = \Midtrans\Snap::createTransaction($midtrans_params)->redirect_url;
             $checkout->midtrans_url = $paymentUrl;
+            $checkout->total = $total;
             $checkout->save();
 
             return $paymentUrl;
@@ -221,7 +242,7 @@ class CheckoutController extends Controller
         }
 
         $checkout->save();
-        return view('checkouts/success');
+        return redirect(route('user.dashboard'));
     }
 
 }
