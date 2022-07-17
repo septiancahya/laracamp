@@ -32,7 +32,7 @@
                             </p>
                         </td>
                         <td>
-                            <strong>${{ $checkout->Camp->price }}</strong>
+                            <strong>{{ $checkout->Camp->price }}K</strong>
                         </td>
                         <td>
                         @if ($checkout->is_paid)

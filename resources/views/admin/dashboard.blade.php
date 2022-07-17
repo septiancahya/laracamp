@@ -27,7 +27,7 @@
                                 <tr>
                                     <td>{{ $checkout->User->name }}</td>
                                     <td>{{ $checkout->Camp->title }}</td>
-                                    <td>{{ $checkout->price }}</td>
+                                    <td>{{ $checkout->price }}K</td>
                                     <td>{{ $checkout->created_at->format('M d Y') }}</td>
                                     <td>
                                     @if ($checkout->is_paid)
