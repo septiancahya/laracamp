@@ -34,7 +34,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3">No camps registered</td>
+                                    <td colspan="5">No camps registered</td>
                                 </tr>
                             @endforelse
                         </tbody>
